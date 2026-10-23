@@ -204,6 +204,44 @@ if (preg_match('/^\/loans\/([a-z0-9]+)\/items\/([a-z0-9]+)\/return$/', $path, $m
     exit;
 }
 
+if ($path === '/reports/most-lent' && $method === 'GET') {
+    $start = $_GET['start_date'] ?? '';
+    $end = $_GET['end_date'] ?? '';
+
+    if (!$start || !$end) {
+        http_response_code(422);
+        echo json_encode(['code' => 'VALIDATION_ERROR', 'message' => 'Fechas requeridas.', 'details' => []]);
+        exit;
+    }
+
+    $startDate = new DateTime($start, new DateTimeZone('UTC'));
+    $endDate = new DateTime($end, new DateTimeZone('UTC'));
+
+    if ($endDate < $startDate) {
+        http_response_code(422);
+        echo json_encode(['code' => 'INVALID_DATE_RANGE', 'message' => 'Fin anterior al inicio.', 'details' => []]);
+        exit;
+    }
+
+    $report = [];
+    foreach ($db['loans'] as $loan) {
+        $loanDate = new DateTime($loan['loaned_at'], new DateTimeZone('UTC'));
+        if ($loanDate >= $startDate && $loanDate <= $endDate) {
+            foreach ($loan['items'] as $item) {
+                $key = $item['book_title'] . '|' . $item['category_name'];
+                if (!isset($report[$key])) {
+                    $report[$key] = ['book_title' => $item['book_title'], 'category_name' => $item['category_name'], 'count' => 0];
+                }
+                $report[$key]['count']++;
+            }
+        }
+    }
+
+    usort($report, fn($a, $b) => $b['count'] <=> $a['count']);
+    echo json_encode(['items' => array_values($report)]);
+    exit;
+}
+
 if ($path === '/overdue-items' && $method === 'GET') {
     $now = new DateTime('now', new DateTimeZone('UTC'));
     $overdue = [];
