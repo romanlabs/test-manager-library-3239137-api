@@ -170,5 +170,31 @@ if (preg_match('/^\/loans\/([a-z0-9]+)\/items\/([a-z0-9]+)\/return$/', $path, $m
     exit;
 }
 
+if ($path === '/overdue-items' && $method === 'GET') {
+    $now = new DateTime('now', new DateTimeZone('UTC'));
+    $overdue = [];
+
+    foreach ($db['loans'] as $loan) {
+        $member = current(array_filter($db['members'], fn($m) => $m['id'] === $loan['member_id']));
+        foreach ($loan['items'] as $item) {
+            if ($item['returned_at']) continue;
+            $dueDate = new DateTime($item['due_at'], new DateTimeZone('UTC'));
+            if ($dueDate < $now) {
+                $daysLate = $now->diff($dueDate)->days;
+                $overdue[] = [
+                    'book_title' => $item['book_title'],
+                    'member_name' => $member['name'],
+                    'due_at' => $item['due_at'],
+                    'days_late' => $daysLate
+                ];
+            }
+        }
+    }
+
+    usort($overdue, fn($a, $b) => $b['days_late'] <=> $a['days_late']);
+    echo json_encode(['items' => $overdue]);
+    exit;
+}
+
 http_response_code(404);
 echo json_encode(['code' => 'NOT_FOUND', 'message' => 'Endpoint no encontrado.', 'details' => []]);
