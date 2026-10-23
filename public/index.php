@@ -48,6 +48,40 @@ if ($path === '/auth/login' && $method === 'POST') {
     exit;
 }
 
+if ($path === '/users' && $method === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($data['role']) && $data['role'] === 'admin') {
+        http_response_code(422);
+        echo json_encode(['code' => 'VALIDATION_ERROR', 'message' => 'No se puede crear admin por API.', 'details' => []]);
+        exit;
+    }
+
+    $username = strtolower(trim($data['username']));
+    $userExists = current(array_filter($db['members'] ?? [], fn($u) => ($u['username'] ?? '') === $username));
+
+    if ($userExists) {
+        http_response_code(409);
+        echo json_encode(['code' => 'USERNAME_TAKEN', 'message' => 'El usuario ya existe.', 'details' => []]);
+        exit;
+    }
+
+    $new = [
+        'id' => 'u'.uniqid(),
+        'username' => $username,
+        'password_hash' => password_hash($data['password'], PASSWORD_BCRYPT),
+        'role' => $data['role'] ?? 'librarian'
+    ];
+
+    http_response_code(201);
+    echo json_encode([
+        'id' => $new['id'],
+        'username' => $new['username'],
+        'role' => $new['role']
+    ]);
+    exit;
+}
+
 if ($path === '/categories' && $method === 'GET') {
     usort($db['categories'], fn($a, $b) => strcmp($a['name'], $b['name']));
     echo json_encode(['items' => $db['categories']]);
