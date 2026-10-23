@@ -27,6 +27,9 @@ $db = [
     'books' => [
         ['id' => 'b1', 'title' => 'Cien años de soledad', 'author' => 'García Márquez', 'isbn' => '9780307474728', 'category' => ['id' => '1', 'name' => 'Novela'], 'total_copies' => 4, 'available_copies' => 3, 'cover_key' => null],
         ['id' => 'b2', 'title' => 'El Quijote', 'author' => 'Cervantes', 'isbn' => '9788491110385', 'category' => ['id' => '1', 'name' => 'Novela'], 'total_copies' => 5, 'available_copies' => 5, 'cover_key' => null],
+        ['id' => 'b3', 'title' => 'Alas de pajaro', 'author' => 'Laura Ingalls Wilder', 'isbn' => '9780064400087', 'category' => ['id' => '2', 'name' => 'Infantil'], 'total_copies' => 4, 'available_copies' => 2, 'cover_key' => null],
+        ['id' => 'b4', 'title' => 'Clean Code', 'author' => 'Robert C. Martin', 'isbn' => '9780132350884', 'category' => ['id' => '3', 'name' => 'Tecnico'], 'total_copies' => 2, 'available_copies' => 1, 'cover_key' => null],
+        ['id' => 'b5', 'title' => 'El Principito', 'author' => 'Antoine de Saint-Exupery', 'isbn' => '9788701401266', 'category' => ['id' => '2', 'name' => 'Infantil'], 'total_copies' => 6, 'available_copies' => 4, 'cover_key' => null],
     ],
     'members' => [
         ['id' => 'm1', 'name' => 'Juan Pérez', 'document' => '12345678'],
